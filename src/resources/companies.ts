@@ -26,6 +26,15 @@ export class CompanyQuery implements PromiseLike<Company> {
   withNbs(): this { this.scopes.push('nbs'); return this; }
   withTaxReliability(): this { this.scopes.push('tax_reliability'); return this; }
   withErasedVat(): this { this.scopes.push('erased_vat'); return this; }
+  withReges(): this { this.scopes.push('reges'); return this; }
+  withSocialEnterprise(): this { this.scopes.push('social_enterprise'); return this; }
+  withGleif(): this { this.scopes.push('gleif'); return this; }
+  withSanctions(): this { this.scopes.push('sanctions'); return this; }
+  withTedTenders(): this { this.scopes.push('ted_tenders'); return this; }
+  withReplikAdministrator(): this { this.scopes.push('replik_administrator'); return this; }
+  withSbs(): this { this.scopes.push('sbs'); return this; }
+  withTransportLicence(): this { this.scopes.push('transport_licence'); return this; }
+  withUtilityLicence(): this { this.scopes.push('utility_licence'); return this; }
   withAll(): this { this.scopes = ['all']; return this; }
 
   /**

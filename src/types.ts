@@ -90,6 +90,89 @@ export interface ErasedVatEntry {
   erased_at?: string;
 }
 
+export interface RegesInfo {
+  is_qualified_supplier: boolean;
+  registration_id?: string | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+}
+
+export interface SocialEnterpriseInfo {
+  is_registered: boolean;
+  type?: string | null;
+  granted_at?: string | null;
+  certificate_number?: string | null;
+  status?: string | null;
+}
+
+export interface GleifInfo {
+  lei: string;
+  parent_lei?: string | null;
+  ultimate_parent_lei?: string | null;
+  status?: string | null;
+  registration_status?: string | null;
+}
+
+export interface SanctionsHit {
+  [key: string]: unknown;
+}
+
+export interface SanctionsInfo {
+  eu_fsf_hits: SanctionsHit[];
+  ofac_hits: SanctionsHit[];
+  total_hits: number;
+}
+
+export interface TedNoticeItem {
+  publication_number: string;
+  title?: string | null;
+  publication_date?: string | null;
+  value?: number | null;
+  currency?: string | null;
+}
+
+export interface TedTendersInfo {
+  count: number;
+  latest: TedNoticeItem[];
+  total_value: number;
+}
+
+export interface ReplikAdministratorInfo {
+  license_number: string;
+  region?: string | null;
+  status?: string | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+}
+
+export interface SbsInfo {
+  has_licence: boolean;
+  license_number?: string | null;
+  license_type?: string | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+}
+
+export interface TransportLicenceInfo {
+  has_licence: boolean;
+  eurolicence_number?: string | null;
+  vehicles_count?: number | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+}
+
+export interface UtilitySegment {
+  licence_number: string;
+  segment: string;
+  valid_from?: string | null;
+  valid_to?: string | null;
+}
+
+export interface UtilityLicenceInfo {
+  has_licences: boolean;
+  segments: UtilitySegment[];
+}
+
 export interface CompanyData {
   id: number;
   orsr_id: string;
@@ -124,6 +207,15 @@ export interface CompanyData {
     is_erased: boolean;
     entries: ErasedVatEntry[];
   };
+  reges?: RegesInfo;
+  social_enterprise?: SocialEnterpriseInfo;
+  gleif?: GleifInfo | null;
+  sanctions?: SanctionsInfo;
+  ted_tenders?: TedTendersInfo;
+  replik_administrator?: ReplikAdministratorInfo | null;
+  sbs?: SbsInfo;
+  transport_licence?: TransportLicenceInfo;
+  utility_licence?: UtilityLicenceInfo;
 }
 
 export interface Company extends ApiResponse<CompanyData> {}

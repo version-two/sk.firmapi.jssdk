@@ -173,6 +173,111 @@ export interface UtilityLicenceInfo {
   segments: UtilitySegment[];
 }
 
+export interface ContractingAuthorityInfo {
+  is_contracting_authority: boolean;
+  classification_section?: string | null;
+  classification_label?: string | null;
+}
+
+export interface DebarredInfo {
+  is_debarred: boolean;
+  is_listed: boolean;
+  status?: string | null;
+  violation_reason?: string | null;
+  banned_from?: string | null;
+  banned_until?: string | null;
+}
+
+export interface UvoReferenceItem {
+  buyer_name: string;
+  contract_subject: string;
+  document_url?: string | null;
+  rating?: string | null;
+  published_at?: string | null;
+  /** Hodnota zmluvy v EUR. */
+  value?: number | null;
+}
+
+export interface UvoReferencesInfo {
+  count: number;
+  /** Súčet hodnoty zmlúv v EUR. */
+  total_value: number;
+  currency: string;
+  latest: UvoReferenceItem[];
+}
+
+export interface FsDphnoEntry {
+  period?: string | null;
+  excess_eur?: number | null;
+  own_tax_eur?: number | null;
+}
+
+export interface FsDphoEntry {
+  ic_dph?: string | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+}
+
+export interface FsDphzEntry {
+  year?: number | null;
+  published_at?: string | null;
+}
+
+export interface FsDpposEntry {
+  period_from?: string | null;
+  period_to?: string | null;
+  tax_eur?: number | null;
+  loss_eur?: number | null;
+}
+
+export interface FsDphOudEntry {
+  oud_cislo?: string | null;
+  oud_typ?: string | null;
+  iban?: string | null;
+  bank_code?: string | null;
+}
+
+export interface FsRdDeductionEntry {
+  period?: string | null;
+  amount_eur?: number | null;
+  project?: string | null;
+  started_at?: string | null;
+}
+
+export interface FsInvestmentDeductionEntry {
+  period?: string | null;
+  amount_eur?: number | null;
+  investment_eur?: number | null;
+  percent_planned?: number | null;
+}
+
+export interface FsPatentBoxEntry {
+  subtype?: string | null;
+  period?: string | null;
+  exemption_eur?: number | null;
+  patent_text?: string | null;
+}
+
+export interface FsRegulatedEntry {
+  type?: string | null;
+  from?: string | null;
+  to?: string | null;
+}
+
+/** Daňové údaje z Finančnej správy SR. Dostupné pre plány s funkciou fs_imports. */
+export interface FsData {
+  dphno?: FsDphnoEntry[] | null;
+  dpho?: FsDphoEntry[] | null;
+  dphz?: FsDphzEntry[] | null;
+  dppos?: FsDpposEntry[] | null;
+  dsrdp_registered?: boolean | null;
+  dph_oud?: FsDphOudEntry[] | null;
+  rd_deduction?: FsRdDeductionEntry[] | null;
+  investment_deduction?: FsInvestmentDeductionEntry[] | null;
+  patent_box?: FsPatentBoxEntry[] | null;
+  regulated?: FsRegulatedEntry[] | null;
+}
+
 export interface CompanyData {
   id: number;
   orsr_id: string;
@@ -216,6 +321,10 @@ export interface CompanyData {
   sbs?: SbsInfo;
   transport_licence?: TransportLicenceInfo;
   utility_licence?: UtilityLicenceInfo;
+  contracting_authority?: ContractingAuthorityInfo;
+  debarred?: DebarredInfo;
+  uvo_references?: UvoReferencesInfo;
+  fs?: FsData;
 }
 
 export interface Company extends ApiResponse<CompanyData> {}

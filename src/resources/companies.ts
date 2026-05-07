@@ -35,6 +35,9 @@ export class CompanyQuery implements PromiseLike<Company> {
   withSbs(): this { this.scopes.push('sbs'); return this; }
   withTransportLicence(): this { this.scopes.push('transport_licence'); return this; }
   withUtilityLicence(): this { this.scopes.push('utility_licence'); return this; }
+  withContractingAuthority(): this { this.scopes.push('contracting_authority'); return this; }
+  withDebarred(): this { this.scopes.push('debarred'); return this; }
+  withUvoReferences(): this { this.scopes.push('uvo_references'); return this; }
   withAll(): this { this.scopes = ['all']; return this; }
 
   /**

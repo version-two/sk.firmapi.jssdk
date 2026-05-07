@@ -231,10 +231,13 @@ export interface FsDpposEntry {
 }
 
 export interface FsDphOudEntry {
-  oud_cislo?: string | null;
-  oud_typ?: string | null;
+  name?: string | null;
   iban?: string | null;
   bank_code?: string | null;
+  street?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
 }
 
 export interface FsRdDeductionEntry {

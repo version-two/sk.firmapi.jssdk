@@ -309,6 +309,7 @@ export interface CompanyData {
   nbs?: {
     is_regulated: boolean;
     license_types: string[];
+    categories: string[];
   };
   tax_reliability?: TaxReliability;
   erased_vat?: {

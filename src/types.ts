@@ -311,6 +311,16 @@ export interface CompanyData {
     license_types: string[];
     categories: string[];
   };
+  soi_travel_agency?: {
+    is_registered: boolean;
+    name?: string;
+    address?: string | null;
+    insolvency_provider?: string | null;
+    insolvency_amount?: number | null;
+    insolvency_valid_from?: string | null;
+    insolvency_valid_to?: string | null;
+    has_ban?: boolean;
+  };
   tax_reliability?: TaxReliability;
   erased_vat?: {
     is_erased: boolean;

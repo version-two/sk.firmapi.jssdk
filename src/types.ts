@@ -321,6 +321,7 @@ export interface CompanyData {
     insolvency_valid_to?: string | null;
     has_ban?: boolean;
   };
+  svps_establishments?: SvpsEstablishment[];
   tax_reliability?: TaxReliability;
   erased_vat?: {
     is_erased: boolean;
@@ -339,6 +340,21 @@ export interface CompanyData {
   debarred?: DebarredInfo;
   uvo_references?: UvoReferencesInfo;
   fs?: FsData;
+}
+
+export interface SvpsEstablishment {
+  approval_number: string;
+  register_type: 'food' | 'vet';
+  section_code?: string | null;
+  section_label?: string | null;
+  activity_code?: string | null;
+  activity_label?: string | null;
+  name: string;
+  city?: string | null;
+  district?: string | null;
+  region?: string | null;
+  match_confidence?: number | null;
+  match_method?: string | null;
 }
 
 export interface Company extends ApiResponse<CompanyData> {}

@@ -43,6 +43,7 @@ export class CompanyQuery implements PromiseLike<Company> {
   withCourtDecisions(): this { this.scopes.push('court_decisions'); return this; }
   withEmployerHeadcount(): this { this.scopes.push('employer_headcount'); return this; }
   withSoiTravelAgency(): this { this.scopes.push('soi_travel_agency'); return this; }
+  withSvpsEstablishments(): this { this.scopes.push('svps_establishments'); return this; }
   withAll(): this { this.scopes = ['all']; return this; }
 
   /**

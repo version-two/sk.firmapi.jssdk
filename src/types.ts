@@ -206,6 +206,25 @@ export interface UvoReferencesInfo {
   latest: UvoReferenceItem[];
 }
 
+export interface CrpProjectItem {
+  crp_id: string;
+  name: string;
+  provider?: string | null;
+  help_type?: string | null;
+  /** Výška pomoci v EUR. */
+  amount?: number | null;
+  published_at?: string | null;
+  detail_url: string;
+}
+
+export interface CrpProjectsInfo {
+  count: number;
+  /** Súčet výšky pomoci v EUR. */
+  total_value: number;
+  currency: string;
+  latest: CrpProjectItem[];
+}
+
 export interface FsDphnoEntry {
   period?: string | null;
   excess_eur?: number | null;
@@ -339,6 +358,7 @@ export interface CompanyData {
   contracting_authority?: ContractingAuthorityInfo;
   debarred?: DebarredInfo;
   uvo_references?: UvoReferencesInfo;
+  crp_projects?: CrpProjectsInfo;
   fs?: FsData;
 }
 

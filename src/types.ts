@@ -61,6 +61,28 @@ export interface Financials {
   employees?: number;
 }
 
+export interface FinancialStatement {
+  year: number;
+  /** e.g. "riadna" (regular) | "mimoriadna" (extraordinary). */
+  statement_type?: string | null;
+  total_assets?: number | null;
+  total_equity?: number | null;
+  total_liabilities?: number | null;
+  total_revenue?: number | null;
+  net_profit?: number | null;
+  template_type?: string | null;
+  size_category?: string | null;
+}
+
+export interface FinancialStatementsInfo {
+  /** Most recent regular ("riadna") statement, or null when none exist. */
+  latest: FinancialStatement | null;
+  /** Full multi-year series, newest year first. Drives revenue/profit/equity charts. */
+  statements: FinancialStatement[];
+  /** Distinct years with statements, ascending. */
+  available_years: number[];
+}
+
 export interface ExecutionAuthorization {
   ecli: string;
   court_file_number?: string;
@@ -316,6 +338,7 @@ export interface CompanyData {
   bank_accounts?: BankAccount[];
   contacts?: Contacts;
   financials?: Financials;
+  financial_statements?: FinancialStatementsInfo;
   execution_authorizations?: {
     has_active_authorizations: boolean;
     total_count: number;

@@ -83,6 +83,90 @@ export interface FinancialStatementsInfo {
   available_years: number[];
 }
 
+export interface DebtorSource {
+  source?: string | null;
+  debtor_name?: string | null;
+  debt_amount?: number | null;
+  listed_since?: string | null;
+}
+
+export interface DebtorStatus {
+  is_debtor: boolean;
+  sources: DebtorSource[];
+}
+
+export interface InsolvencyProceeding {
+  case_number?: string | null;
+  proceeding_type?: string | null;
+  status?: string | null;
+  court?: string | null;
+  administrator?: string | null;
+  started_at?: string | null;
+}
+
+export interface InsolvencyInfo {
+  has_active_proceedings: boolean;
+  proceedings: InsolvencyProceeding[];
+}
+
+export interface CommercialBulletinEntry {
+  section?: string | null;
+  heading?: string | null;
+  published_at?: string | null;
+}
+
+export interface CommercialBulletinInfo {
+  total_entries: number;
+  latest_entries: CommercialBulletinEntry[];
+}
+
+export interface PublicContractsSummary {
+  count: number;
+  total_value: number | null;
+}
+
+export interface ProcurementSummary {
+  count: number;
+  total_awarded_value: number | null;
+}
+
+export interface IllegalEmploymentEntry {
+  violation_date?: string | null;
+  decision_date?: string | null;
+  decision_number?: string | null;
+  address?: string | null;
+}
+
+export interface IllegalEmploymentInfo {
+  listed: boolean;
+  count: number;
+  since?: string | null;
+  entries: IllegalEmploymentEntry[];
+}
+
+export interface CourtDecisionItem {
+  decision_date?: string | null;
+  court?: string | null;
+  case_number?: string | null;
+  role?: string | null;
+  ruling?: string | null;
+  decision_type?: string | null;
+  pdf_url?: string | null;
+}
+
+export interface CourtDecisionsInfo {
+  total: number;
+  last_5_years: number;
+  recent: CourtDecisionItem[];
+}
+
+export interface EmployerHeadcountInfo {
+  name?: string | null;
+  bracket?: string | null;
+  registered_at?: string | null;
+  deregistered_at?: string | null;
+}
+
 export interface ExecutionAuthorization {
   ecli: string;
   court_file_number?: string;
@@ -339,6 +423,14 @@ export interface CompanyData {
   contacts?: Contacts;
   financials?: Financials;
   financial_statements?: FinancialStatementsInfo;
+  debtor_status?: DebtorStatus;
+  insolvency?: InsolvencyInfo;
+  commercial_bulletin?: CommercialBulletinInfo;
+  public_contracts_summary?: PublicContractsSummary;
+  procurement_summary?: ProcurementSummary;
+  illegal_employment?: IllegalEmploymentInfo;
+  court_decisions?: CourtDecisionsInfo;
+  employer_headcount?: EmployerHeadcountInfo | null;
   execution_authorizations?: {
     has_active_authorizations: boolean;
     total_count: number;

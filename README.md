@@ -10,12 +10,15 @@ Official JavaScript/TypeScript SDK for [FirmAPI](https://firmapi.sk) - Slovak Co
 ## Installation
 
 ```bash
-npm install firmapi
+npm install firmapi@^2
 # or
-yarn add firmapi
+yarn add firmapi@^2
 # or
-pnpm add firmapi
+pnpm add firmapi@^2
 ```
+
+> These docs cover **v2.x**. Upgrading from v1? See [CHANGELOG.md](CHANGELOG.md)
+> for the breaking changes (fast-by-default, typed responses, `byId` removed).
 
 ## Quick Start
 

@@ -21,6 +21,7 @@ export class FirmApi {
   private readonly timeout: number;
   public readonly waitForFreshData: boolean;
   public readonly maxStaleRetries: number;
+  public readonly maxRetries: number;
 
   public readonly companies: Companies;
   public readonly search: Search;
@@ -32,14 +33,16 @@ export class FirmApi {
       this.apiKey = apiKeyOrConfig;
       this.baseUrl = DEFAULT_BASE_URL;
       this.timeout = DEFAULT_TIMEOUT;
-      this.waitForFreshData = true;
+      this.waitForFreshData = false;
       this.maxStaleRetries = 3;
+      this.maxRetries = 2;
     } else {
       this.apiKey = apiKeyOrConfig.apiKey;
       this.baseUrl = apiKeyOrConfig.baseUrl?.replace(/\/$/, '') ?? DEFAULT_BASE_URL;
       this.timeout = apiKeyOrConfig.timeout ?? DEFAULT_TIMEOUT;
-      this.waitForFreshData = apiKeyOrConfig.waitForFreshData ?? true;
+      this.waitForFreshData = apiKeyOrConfig.waitForFreshData ?? false;
       this.maxStaleRetries = apiKeyOrConfig.maxStaleRetries ?? 3;
+      this.maxRetries = apiKeyOrConfig.maxRetries ?? 2;
     }
 
     this.companies = new Companies(this);
@@ -92,47 +95,92 @@ export class FirmApi {
   }
 
   /**
-   * Make a request to the API.
+   * Make a request to the API, retrying transient failures (HTTP 5xx and
+   * network errors) with exponential backoff up to `maxRetries`. HTTP 429 is
+   * never silently retried; it surfaces as a RateLimitException so the caller
+   * controls pacing. Request timeouts are surfaced immediately (408).
    */
   private async request<T>(method: string, url: string, body?: unknown): Promise<T> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    let attempt = 0;
 
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: body ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
-      });
+    while (true) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-      clearTimeout(timeoutId);
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: body ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+        });
 
-      if (!response.ok) {
-        await this.handleErrorResponse(response);
-      }
+        clearTimeout(timeoutId);
 
-      return (await response.json()) as T;
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof ApiException) {
-        throw error;
-      }
-
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new ApiException('Request timeout', 408);
+        if (!response.ok) {
+          // Retry only server-side transient failures, never 4xx (incl. 429).
+          if (response.status >= 500 && attempt < this.maxRetries) {
+            attempt++;
+            await this.backoff(attempt - 1);
+            continue;
+          }
+          await this.handleErrorResponse(response);
         }
-        throw new ApiException(`Network error: ${error.message}`, 0);
-      }
 
-      throw new ApiException('Unknown error occurred', 0);
+        return await this.parseJson<T>(response);
+      } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error instanceof ApiException) {
+          throw error;
+        }
+
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            throw new ApiException('Request timeout', 408);
+          }
+          // Network error (e.g. fetch TypeError): transient, safe to retry.
+          if (attempt < this.maxRetries) {
+            attempt++;
+            await this.backoff(attempt - 1);
+            continue;
+          }
+          throw new ApiException(`Network error: ${error.message}`, 0);
+        }
+
+        throw new ApiException('Unknown error occurred', 0);
+      }
     }
+  }
+
+  /**
+   * Parse a JSON response body, failing loudly on malformed payloads instead of
+   * silently returning nothing (which would hide HTML error pages / truncated
+   * responses).
+   */
+  private async parseJson<T>(response: Response): Promise<T> {
+    const text = await response.text();
+    if (text.trim() === '') {
+      return {} as T;
+    }
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new ApiException('Malformed JSON response from API', 0);
+    }
+  }
+
+  /**
+   * Exponential backoff (250ms, 500ms, 1s, ... capped at 5s) between
+   * transient-failure retries.
+   */
+  private backoff(attempt: number): Promise<void> {
+    const ms = Math.min(5000, 250 * 2 ** attempt);
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**

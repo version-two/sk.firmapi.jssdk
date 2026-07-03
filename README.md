@@ -45,26 +45,83 @@ import FirmApi from 'firmapi';
 // Basic initialization
 const client = new FirmApi('your-api-key');
 
-// With custom options
+// With custom options (defaults shown)
 const client = new FirmApi({
   apiKey: 'your-api-key',
-  baseUrl: 'https://api.firmapi.sk/v1', // optional
-  timeout: 30000, // optional, in milliseconds
+  baseUrl: 'https://api.firmapi.sk/v1', // optional override
+  timeout: 30000,          // per-request timeout (ms)
+  waitForFreshData: false, // block/re-poll until non-stale (opt-in)
+  maxStaleRetries: 3,      // re-polls when waiting for fresh data
+  maxRetries: 2,           // retries for transient 5xx/network errors
 });
+```
+
+Transient failures (HTTP 5xx and network errors) are retried automatically with
+exponential backoff, up to `maxRetries`. HTTP 429 is **not** retried — it is
+raised as a `RateLimitException` so you control pacing.
+
+### Fresh vs. cached data (important)
+
+FirmAPI serves precomputed company data immediately. When a background refresh
+is queued, the response carries `meta.stale = true` — the data you received is
+still valid; the flag only tells you a newer version is being prepared.
+
+By default (since v2.0) the SDK returns that immediately-available data without
+waiting. If you specifically need the post-refresh values and can tolerate the
+extra latency and billed re-poll requests, opt in per query with `fresh()`:
+
+```typescript
+// Fast (default): resolves immediately, even if meta.stale is true
+const company = await client.companies.byIco('51636549').get();
+
+// Wait for a completed refresh (re-polls, bounded)
+const fresh = await client.companies.byIco('51636549').fresh().get();
 ```
 
 ### Companies
 
 ```typescript
-// Get company by IČO (8-digit registration number)
+// Get company by IČO (8-digit registration number).
+// The query is thenable, so `await` resolves it directly; .get() is equivalent.
 const company = await client.companies.byIco('51636549');
 
 // Get company by ORSR ID
 const company = await client.companies.byOrsrId('427482');
-
-// Get company by internal ID
-const company = await client.companies.byId(12345);
 ```
+
+Companies are always identified by IČO or ORSR ID — the SDK does not expose
+internal numeric database identifiers.
+
+#### Enrichment scopes
+
+Request additional datasets with the fluent `withX()` helpers (each maps to an
+API `scope`, subject to your plan's features), then resolve the query:
+
+```typescript
+const company = await client.companies.byIco('51636549')
+  .withTax()
+  .withFinancials()
+  .withSanctions()
+  .get();
+
+// Everything your plan is entitled to
+const all = await client.companies.byIco('51636549').withAll().get();
+```
+
+Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
+`withFinancials`, `withDebtorStatus`, `withFinancialStatements`,
+`withInsolvency`, `withCommercialBulletin`, `withPublicContracts`,
+`withProcurement`, `withExecutionAuthorizations`, `withRpvs`, `withNbs`,
+`withTaxReliability`, `withErasedVat`, `withReges`, `withSocialEnterprise`,
+`withGleif`, `withSanctions`, `withTedTenders`, `withReplikAdministrator`,
+`withSbs`, `withTransportLicence`, `withUtilityLicence`,
+`withContractingAuthority`, `withDebarred`, `withUvoReferences`,
+`withFsImports`, `withIllegalEmployment`, `withCourtDecisions`,
+`withEmployerHeadcount`, `withSoiTravelAgency`, `withSvpsEstablishments`,
+`withCrpProjects`, `withTradeLicenseActivities`, `withAll`.
+
+`with(...scopes: string[])` is an escape hatch for raw scope tokens, e.g.
+`.with('tax', 'sanctions')`.
 
 ### Search
 
@@ -246,6 +303,19 @@ The SDK uses the standard `fetch` API and works in modern browsers:
   console.log(company);
 </script>
 ```
+
+## Upgrading from v1.x
+
+v2.0 is a behavior/API change:
+
+- **Fast by default.** Lookups no longer block waiting for a background refresh.
+  If you relied on the old auto-wait, call `.fresh()` per query, or set
+  `waitForFreshData: true` in the config.
+- **`companies.byId(id)` was removed.** Use `byIco()` or `byOrsrId()`.
+- **Transient retries added.** 5xx/network errors are retried (`maxRetries`,
+  default 2); 429 still raises `RateLimitException`.
+- **Malformed responses now throw** `ApiException` instead of resolving with a
+  broken value.
 
 ## License
 

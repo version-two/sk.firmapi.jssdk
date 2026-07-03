@@ -2,10 +2,17 @@ export interface FirmApiConfig {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;
-  /** Auto-retry when response has stale data (default: true) */
+  /**
+   * Block and re-poll until the API reports non-stale data (default: false).
+   * The API returns valid precomputed data immediately and only flags
+   * `meta.stale` to signal a queued refresh, so waiting is off by default;
+   * opt in per query with CompanyQuery.fresh() instead.
+   */
   waitForFreshData?: boolean;
-  /** Max retries for stale data (default: 3) */
+  /** Max re-polls when waiting for fresh data (default: 3) */
   maxStaleRetries?: number;
+  /** Retries for transient 5xx/network errors with backoff (default: 2) */
+  maxRetries?: number;
 }
 
 export interface ApiResponse<T = unknown> {

@@ -7,9 +7,33 @@ export class CompanyQuery implements PromiseLike<Company> {
   constructor(
     private readonly client: FirmApi,
     private readonly path: string,
-    private readonly waitForFreshData: boolean,
-    private readonly maxStaleRetries: number,
+    private waitForFreshData: boolean,
+    private maxStaleRetries: number,
   ) {}
+
+  /**
+   * Opt THIS query into waiting for a completed background refresh.
+   *
+   * By default the SDK returns the API's immediately-available (precomputed)
+   * data even when `meta.stale` is set -- that data is valid; the flag only
+   * means a refresh is queued. Call fresh() when you specifically need the
+   * post-refresh values and can tolerate the added latency (and extra billed
+   * re-poll requests).
+   */
+  fresh(maxRetries?: number): this {
+    this.waitForFreshData = true;
+    if (maxRetries !== undefined) {
+      this.maxStaleRetries = Math.max(0, maxRetries);
+    }
+    return this;
+  }
+
+  /**
+   * Add one or more raw scope tokens (e.g. with('tax', 'sanctions')).
+   * Prefer the typed withX() helpers; this is an escape hatch for scopes added
+   * to the API before a matching helper ships.
+   */
+  with(...scopes: string[]): this { this.scopes.push(...scopes); return this; }
 
   withTax(): this { this.scopes.push('tax'); return this; }
   withBankAccounts(): this { this.scopes.push('bank_accounts'); return this; }
@@ -45,6 +69,7 @@ export class CompanyQuery implements PromiseLike<Company> {
   withSoiTravelAgency(): this { this.scopes.push('soi_travel_agency'); return this; }
   withSvpsEstablishments(): this { this.scopes.push('svps_establishments'); return this; }
   withCrpProjects(): this { this.scopes.push('crp_projects'); return this; }
+  withTradeLicenseActivities(): this { this.scopes.push('trade_license_activities'); return this; }
   withAll(): this { this.scopes = ['all']; return this; }
 
   /**
@@ -71,18 +96,30 @@ export class CompanyQuery implements PromiseLike<Company> {
     return this.get().then(onfulfilled, onrejected);
   }
 
+  /**
+   * Total wall-clock budget (ms) for the opt-in fresh-data wait, across all
+   * re-polls, so fresh() can never block a caller for minutes.
+   */
+  private static readonly MAX_TOTAL_WAIT_MS = 120000;
+
   private async resolveStaleResponse(response: Company, path: string): Promise<Company> {
     if (!this.waitForFreshData || !response.meta?.stale) {
       return response;
     }
 
     let current = response;
+    let spent = 0;
 
     for (let attempt = 0; attempt < this.maxStaleRetries; attempt++) {
       const waitMs = this.calculateWaitMs(current.meta?.retry_at ?? null);
 
+      if (spent + waitMs > CompanyQuery.MAX_TOTAL_WAIT_MS) {
+        break;
+      }
+
       if (waitMs > 0) {
         await new Promise(resolve => setTimeout(resolve, waitMs));
+        spent += waitMs;
       }
 
       current = await this.client.get<Company>(path);
@@ -137,18 +174,6 @@ export class Companies {
     return new CompanyQuery(
       this.client,
       `/company/id/${orsrId}`,
-      this.client.waitForFreshData,
-      this.client.maxStaleRetries,
-    );
-  }
-
-  /**
-   * Look up a company by internal database ID.
-   */
-  byId(id: number): CompanyQuery {
-    return new CompanyQuery(
-      this.client,
-      `/company/${id}`,
       this.client.waitForFreshData,
       this.client.maxStaleRetries,
     );

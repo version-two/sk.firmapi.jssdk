@@ -24,6 +24,9 @@ PHP SDK v2.0.0.
 - Automatic retry of transient failures (HTTP 5xx and network errors) with
   exponential backoff, controlled by the new `maxRetries` config option
   (default 2). HTTP 429 is never silently retried; it raises `RateLimitException`.
+- Sandbox can now be enabled three ways: `FirmApi.sandbox()`, the
+  `sandbox: true` config option, or the `FIRMAPI_SANDBOX` env var (auto-detected
+  in Node). A read-only `client.sandbox` flag exposes the resolved mode.
 
 ### Fixed
 - Malformed / non-JSON responses now raise `ApiException` instead of surfacing a

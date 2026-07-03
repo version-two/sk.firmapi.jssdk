@@ -13,6 +13,13 @@ export interface FirmApiConfig {
   maxStaleRetries?: number;
   /** Retries for transient 5xx/network errors with backoff (default: 2) */
   maxRetries?: number;
+  /**
+   * Force sandbox mode: target the public sandbox endpoint with the built-in
+   * sandbox key (no real key needed, demo data, no rate limits). When omitted,
+   * sandbox is auto-enabled from the FIRMAPI_SANDBOX env var in Node
+   * (equivalent to FirmApi.sandbox()).
+   */
+  sandbox?: boolean;
 }
 
 export interface ApiResponse<T = unknown> {

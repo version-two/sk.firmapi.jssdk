@@ -15,10 +15,21 @@ const SANDBOX_BASE_URL = 'https://api.firmapi.sk/v1/sandbox';
 const SANDBOX_API_KEY = 'fa_sandbox_test_key_firmapi_sk_2026';
 const DEFAULT_TIMEOUT = 30000;
 
+/**
+ * Auto-detect sandbox mode from the FIRMAPI_SANDBOX environment variable.
+ * Node only; in browsers `process` is undefined, so this safely returns false.
+ */
+function sandboxFromEnv(): boolean {
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+  const value = env?.FIRMAPI_SANDBOX;
+  return value === 'true' || value === '1';
+}
+
 export class FirmApi {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly timeout: number;
+  public readonly sandbox: boolean;
   public readonly waitForFreshData: boolean;
   public readonly maxStaleRetries: number;
   public readonly maxRetries: number;
@@ -29,21 +40,24 @@ export class FirmApi {
   public readonly account: Account;
 
   constructor(apiKeyOrConfig: string | FirmApiConfig) {
-    if (typeof apiKeyOrConfig === 'string') {
-      this.apiKey = apiKeyOrConfig;
-      this.baseUrl = DEFAULT_BASE_URL;
-      this.timeout = DEFAULT_TIMEOUT;
-      this.waitForFreshData = false;
-      this.maxStaleRetries = 3;
-      this.maxRetries = 2;
+    const config: FirmApiConfig =
+      typeof apiKeyOrConfig === 'string' ? { apiKey: apiKeyOrConfig } : apiKeyOrConfig;
+
+    // Explicit config.sandbox wins; otherwise auto-enable from FIRMAPI_SANDBOX (Node).
+    this.sandbox = config.sandbox ?? sandboxFromEnv();
+
+    if (this.sandbox) {
+      this.apiKey = SANDBOX_API_KEY;
+      this.baseUrl = SANDBOX_BASE_URL;
     } else {
-      this.apiKey = apiKeyOrConfig.apiKey;
-      this.baseUrl = apiKeyOrConfig.baseUrl?.replace(/\/$/, '') ?? DEFAULT_BASE_URL;
-      this.timeout = apiKeyOrConfig.timeout ?? DEFAULT_TIMEOUT;
-      this.waitForFreshData = apiKeyOrConfig.waitForFreshData ?? false;
-      this.maxStaleRetries = apiKeyOrConfig.maxStaleRetries ?? 3;
-      this.maxRetries = apiKeyOrConfig.maxRetries ?? 2;
+      this.apiKey = config.apiKey;
+      this.baseUrl = config.baseUrl?.replace(/\/$/, '') ?? DEFAULT_BASE_URL;
     }
+
+    this.timeout = config.timeout ?? DEFAULT_TIMEOUT;
+    this.waitForFreshData = config.waitForFreshData ?? false;
+    this.maxStaleRetries = config.maxStaleRetries ?? 3;
+    this.maxRetries = config.maxRetries ?? 2;
 
     this.companies = new Companies(this);
     this.search = new Search(this);
@@ -56,10 +70,7 @@ export class FirmApi {
    * No API key needed, uses demo data, no rate limits.
    */
   static sandbox(): FirmApi {
-    return new FirmApi({
-      apiKey: SANDBOX_API_KEY,
-      baseUrl: SANDBOX_BASE_URL,
-    });
+    return new FirmApi({ apiKey: SANDBOX_API_KEY, sandbox: true });
   }
 
   /**

@@ -53,12 +53,32 @@ const client = new FirmApi({
   waitForFreshData: false, // block/re-poll until non-stale (opt-in)
   maxStaleRetries: 3,      // re-polls when waiting for fresh data
   maxRetries: 2,           // retries for transient 5xx/network errors
+  sandbox: false,          // force sandbox; omit to auto-detect FIRMAPI_SANDBOX env
 });
 ```
 
 Transient failures (HTTP 5xx and network errors) are retried automatically with
-exponential backoff, up to `maxRetries`. HTTP 429 is **not** retried — it is
+exponential backoff, up to `maxRetries`. HTTP 429 is **not** retried – it is
 raised as a `RateLimitException` so you control pacing.
+
+### Sandbox mode
+
+The sandbox needs no API key, returns demo data, and has no rate limits. Enable
+it any of three ways:
+
+```typescript
+// 1. Explicit factory (or config flag)
+const client = FirmApi.sandbox();
+const client = new FirmApi({ apiKey: 'ignored', sandbox: true });
+
+// 2. Environment variable (Node) – set before starting your app
+//    FIRMAPI_SANDBOX=true
+const client = new FirmApi('ignored'); // auto-detected -> sandbox
+```
+
+When sandbox is active the base URL and key are overridden with the built-in
+sandbox endpoint automatically, so any key you pass is ignored. An explicit
+`sandbox: true | false` in the config always wins over the env var.
 
 ### Fresh vs. cached data (important)
 

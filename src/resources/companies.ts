@@ -35,6 +35,7 @@ export class CompanyQuery implements PromiseLike<Company> {
    */
   with(...scopes: string[]): this { this.scopes.push(...scopes); return this; }
 
+  withOrsr(): this { this.scopes.push('orsr'); return this; }
   withTax(): this { this.scopes.push('tax'); return this; }
   withBankAccounts(): this { this.scopes.push('bank_accounts'); return this; }
   withContacts(): this { this.scopes.push('contacts'); return this; }

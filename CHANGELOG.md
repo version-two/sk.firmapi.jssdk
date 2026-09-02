@@ -2,6 +2,13 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.1.0
+
+### Added
+- `withOrsr()` scope helper. From API v1.18.0 the base company response no
+  longer includes `shareholders`, `statutory_body` and `business_activities`;
+  request them with `withOrsr()` (or `withAll()`).
+
 ## v2.0.0
 
 Breaking changes to defaults and surface, plus reliability fixes. Mirrors the

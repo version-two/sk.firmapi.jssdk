@@ -430,7 +430,9 @@ export interface CompanyData {
   legal_form?: string;
   business_activities?: string;
   registered_capital?: string;
+  /** Present only with the `orsr` (or `all`) scope. */
   shareholders?: Shareholder[];
+  /** Present only with the `orsr` (or `all`) scope. */
   statutory_body?: StatutoryBody[];
   tax?: TaxInfo;
   bank_accounts?: BankAccount[];

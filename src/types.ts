@@ -35,12 +35,25 @@ export interface ApiResponse<T = unknown> {
   };
 }
 
+/** Function inside a collective body. */
+export type PersonFunction = 'chairman' | 'vice_chairman' | 'member';
+
 /** Equity holder – spoločník, akcionár / jediný akcionár, komanditista, komplementár. */
 export interface Shareholder {
   name: string;
   address?: string | null;
   share_amount?: string | null;
+  /** Paid-up part of the contribution. */
+  share_paid?: string | null;
+  /** ISO 4217 currency of share_amount / share_paid. */
+  share_currency?: string | null;
   share_percentage?: string | null;
+  /** Kind of contribution as registered (peňažný / nepeňažný). */
+  contribution_kind?: string | null;
+  /** Registered lien over the stake, if any. */
+  deposit_lien?: string | null;
+  /** Function inside a collective body (cooperatives, EEIG); null for plain stakes. */
+  function?: PersonFunction | null;
   is_company?: boolean;
   ico?: string | null;
   /** Registry role as published by RPO/ORSR, e.g. "Spoločník v.o.s. / s.r.o.". */
@@ -52,24 +65,61 @@ export interface Shareholder {
   current?: boolean;
 }
 
-/** Registered person without an equity stake – supervisory board, procurator, liquidator, administrator. */
-export interface OtherStakeholder {
+/**
+ * A person or company registered in one of the company's bodies – supervisory
+ * board, procurators, liquidators, administrators, founders, branch heads,
+ * legal predecessors and other registered persons.
+ */
+export interface RegisteredPerson {
   name: string;
   address?: string | null;
   is_company?: boolean;
   ico?: string | null;
   /** Registry role as published by RPO/ORSR, e.g. "Člen dozorného orgánu". */
   stakeholder_type?: string | null;
+  /** Function inside the body; null when the registry does not state one. */
+  function?: PersonFunction | null;
+  /** Only for procurators – the registered rule for how the procurator acts. */
+  acting_method?: string | null;
   effective_from?: string | null;
   effective_to?: string | null;
   current?: boolean;
 }
 
+/** @deprecated since 2.3.0, use RegisteredPerson. */
+export type OtherStakeholder = RegisteredPerson;
+
 export interface StatutoryBody {
   name: string;
-  role: string;
-  address?: string;
-  since?: string;
+  /** Registry role label (konateľ, predseda predstavenstva, člen predstavenstva, ...). */
+  role?: string | null;
+  /** Function inside a collective statutory body; null for konateľ. */
+  function?: PersonFunction | null;
+  /** Type of the statutory body as registered (konatelia, predstavenstvo, ...). */
+  body_type?: string | null;
+  address?: string | null;
+  /** Method of acting on behalf of the company; identical for every member of the body. */
+  acting_method?: string | null;
+  appointed_at?: string | null;
+  effective_from?: string | null;
+  /** Null while the person is still in office. */
+  effective_to?: string | null;
+  /** True when the person is in office as of today. */
+  current?: boolean;
+}
+
+/** One share issue of a joint-stock company. */
+export interface ShareIssue {
+  share_type?: string | null;
+  share_form?: string | null;
+  share_state?: string | null;
+  nominal_value?: string | null;
+  currency?: string | null;
+  count?: number | null;
+  transferability?: string | null;
+  effective_from?: string | null;
+  effective_to?: string | null;
+  current?: boolean;
 }
 
 export interface TaxInfo {
@@ -455,10 +505,26 @@ export interface CompanyData {
   registered_capital?: string;
   /** Present only with the `orsr` (or `all`) scope. Equity holders only. */
   shareholders?: Shareholder[];
-  /** Present only with the `orsr` (or `all`) scope. Registered persons without a stake. */
-  other_stakeholders?: OtherStakeholder[];
-  /** Present only with the `orsr` (or `all`) scope. */
+  /** Present only with the `orsr` (or `all`) scope. Ordered current first, chairman before members. */
   statutory_body?: StatutoryBody[];
+  /** Present only with the `orsr` (or `all`) scope. */
+  supervisory_board?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. `acting_method` carries the procurator acting rule. */
+  procurators?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. */
+  liquidators?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. Insolvency, restructuring and settlement administrators. */
+  administrators?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. */
+  founders?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. */
+  branch_heads?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. Merged companies; `ico` links to their record. */
+  legal_predecessors?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. Registered persons that fit none of the bodies above. */
+  other_stakeholders?: RegisteredPerson[];
+  /** Present only with the `orsr` (or `all`) scope. Share issues of joint-stock companies. */
+  shares?: ShareIssue[];
   tax?: TaxInfo;
   bank_accounts?: BankAccount[];
   contacts?: Contacts;

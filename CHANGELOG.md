@@ -2,6 +2,23 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.3.0
+
+### Added
+- Registry people split by body (API v1.20.0): `CompanyData.supervisory_board`, `procurators`,
+  `liquidators`, `administrators`, `founders`, `branch_heads`, `legal_predecessors` and `shares`;
+  `other_stakeholders` keeps only persons outside those bodies.
+- `RegisteredPerson` type (with `function` and, for procurators, `acting_method`), `ShareIssue`
+  type and the `PersonFunction` union.
+
+### Changed
+- `Shareholder` gained `share_paid`, `share_currency`, `contribution_kind`, `deposit_lien` and `function`.
+- `StatutoryBody` gained `function`, `body_type`, `acting_method`, `appointed_at`, `effective_from`,
+  `effective_to` and `current`.
+
+### Deprecated
+- `OtherStakeholder` is now an alias of `RegisteredPerson`.
+
 ## v2.2.0
 
 ### Changed

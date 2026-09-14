@@ -2,6 +2,17 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.2.0
+
+### Changed
+- `Shareholder` now carries `is_company`, `ico`, `stakeholder_type`, `effective_from`,
+  `effective_to` and `current` (API v1.19.0). `shareholders` holds equity holders only.
+
+### Added
+- `OtherStakeholder` type and `CompanyData.other_stakeholders` – supervisory board
+  members, procurators, liquidators, administrators and other registered persons
+  without a stake.
+
 ## v2.1.0
 
 ### Added

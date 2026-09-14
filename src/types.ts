@@ -35,11 +35,34 @@ export interface ApiResponse<T = unknown> {
   };
 }
 
+/** Equity holder – spoločník, akcionár / jediný akcionár, komanditista, komplementár. */
 export interface Shareholder {
   name: string;
-  share_amount?: string;
-  share_percentage?: string;
-  address?: string;
+  address?: string | null;
+  share_amount?: string | null;
+  share_percentage?: string | null;
+  is_company?: boolean;
+  ico?: string | null;
+  /** Registry role as published by RPO/ORSR, e.g. "Spoločník v.o.s. / s.r.o.". */
+  stakeholder_type?: string | null;
+  effective_from?: string | null;
+  /** Null while the stake is still registered. */
+  effective_to?: string | null;
+  /** True when the stake is registered as of today. */
+  current?: boolean;
+}
+
+/** Registered person without an equity stake – supervisory board, procurator, liquidator, administrator. */
+export interface OtherStakeholder {
+  name: string;
+  address?: string | null;
+  is_company?: boolean;
+  ico?: string | null;
+  /** Registry role as published by RPO/ORSR, e.g. "Člen dozorného orgánu". */
+  stakeholder_type?: string | null;
+  effective_from?: string | null;
+  effective_to?: string | null;
+  current?: boolean;
 }
 
 export interface StatutoryBody {
@@ -430,8 +453,10 @@ export interface CompanyData {
   legal_form?: string;
   business_activities?: string;
   registered_capital?: string;
-  /** Present only with the `orsr` (or `all`) scope. */
+  /** Present only with the `orsr` (or `all`) scope. Equity holders only. */
   shareholders?: Shareholder[];
+  /** Present only with the `orsr` (or `all`) scope. Registered persons without a stake. */
+  other_stakeholders?: OtherStakeholder[];
   /** Present only with the `orsr` (or `all`) scope. */
   statutory_body?: StatutoryBody[];
   tax?: TaxInfo;

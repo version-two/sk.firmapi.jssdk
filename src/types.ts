@@ -418,6 +418,110 @@ export interface CrpProjectsInfo {
   latest: CrpProjectItem[];
 }
 
+export interface Itms21ProjectItem {
+  code: string;
+  name: string;
+  role: 'recipient' | 'partner' | 'supplier';
+  status?: string | null;
+  program?: string | null;
+  call_code?: string | null;
+  provider?: string | null;
+  recipient?: string | null;
+  recipient_ico?: string | null;
+  place?: string | null;
+  in_progress: boolean;
+  completed: boolean;
+  suspended: boolean;
+  excluded_from_funding: boolean;
+  terminated_without_contribution: boolean;
+  /** EUR. */
+  contracted_total?: number | null;
+  contracted_nfp?: number | null;
+  disbursed?: number | null;
+  contract_effective_at?: string | null;
+  started_at?: string | null;
+  planned_end_at?: string | null;
+  detail_url: string;
+}
+
+export interface Itms21ApplicationItem {
+  code: string;
+  name: string;
+  role: 'applicant' | 'partner';
+  status?: string | null;
+  call_code?: string | null;
+  call_name?: string | null;
+  applicant?: string | null;
+  applicant_ico?: string | null;
+  approved: boolean;
+  rejected: boolean;
+  excluded_from_funding: boolean;
+  /** EUR. */
+  requested_nfp?: number | null;
+  requested_total?: number | null;
+  approved_nfp?: number | null;
+  approved_total?: number | null;
+  submitted_at?: string | null;
+  detail_url: string;
+}
+
+export interface Itms21IrregularityItem {
+  kind: 'irregularity' | 'receivable';
+  code: string;
+  status?: string | null;
+  settled: boolean;
+  project_code?: string | null;
+  project_name?: string | null;
+  irregularity_type?: string | null;
+  category?: string | null;
+  document_type?: string | null;
+  eu_budget_impact: boolean;
+  systemic: boolean;
+  /** EUR. */
+  amount?: number | null;
+  to_recover?: number | null;
+  recovered?: number | null;
+  outstanding: number;
+  detected_at?: string | null;
+  due_at?: string | null;
+}
+
+/** ITMS21+ – EU funds 2021 – 2027. All amounts in EUR. */
+export interface Itms21Info {
+  projects: {
+    count: number;
+    total_contracted: number;
+    total_disbursed: number;
+    currency: string;
+    negative_outcomes: number;
+    latest: Itms21ProjectItem[];
+  };
+  applications: {
+    count: number;
+    approved: number;
+    rejected: number;
+    total_requested_nfp: number;
+    total_approved_nfp: number;
+    currency: string;
+    latest: Itms21ApplicationItem[];
+  };
+  irregularities: {
+    count: number;
+    open: number;
+    total_amount: number;
+    total_recovered: number;
+    total_outstanding: number;
+    currency: string;
+    entries: Itms21IrregularityItem[];
+  };
+  procurement: {
+    count: number;
+    awarded: number;
+    total_awarded_value: number | null;
+    currency: string;
+  };
+}
+
 export interface FsDphnoEntry {
   period?: string | null;
   excess_eur?: number | null;
@@ -581,6 +685,7 @@ export interface CompanyData {
   debarred?: DebarredInfo;
   uvo_references?: UvoReferencesInfo;
   crp_projects?: CrpProjectsInfo;
+  itms21?: Itms21Info;
   fs?: FsData;
 }
 

@@ -141,7 +141,7 @@ Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
 `withContractingAuthority`, `withDebarred`, `withUvoReferences`,
 `withFsImports`, `withIllegalEmployment`, `withCourtDecisions`,
 `withEmployerHeadcount`, `withSoiTravelAgency`, `withSvpsEstablishments`,
-`withCrpProjects`, `withTradeLicenseActivities`, `withAll`.
+`withCrpProjects`, `withItms21`, `withTradeLicenseActivities`, `withAll`.
 
 `with(...scopes: string[])` is an escape hatch for raw scope tokens, e.g.
 `.with('tax', 'sanctions')`.

@@ -2,6 +2,13 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.4.0
+
+### Added
+- `withItms21()` scope helper and the `Itms21Info` type (API v1.21.0): EU funds 2021 – 2027 from
+  ITMS21+ – projects, grant applications, irregularities/receivables and a procurement summary
+  under `CompanyData.itms21`.
+
 ## v2.3.0
 
 ### Added

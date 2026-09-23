@@ -32,15 +32,18 @@
     "business-register",
     "typescript"
   ],
-  "author": "Version Two <info@versiontwo.sk>",
+  "author": "Version Two s.r.o. <info@versiontwo.sk> (https://www.versiontwo.sk)",
+  "maintainers": [
+    "Mario Chamuty"
+  ],
   "license": "MIT",
   "homepage": "https://firmapi.sk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/firmapi/sdk-js.git"
+    "url": "git+https://github.com/version-two/sk.firmapi.jssdk.git"
   },
   "bugs": {
-    "url": "https://github.com/firmapi/sdk-js/issues"
+    "url": "https://github.com/version-two/sk.firmapi.jssdk/issues"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

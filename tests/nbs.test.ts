@@ -42,13 +42,13 @@ describe('Nbs resource', () => {
   });
 
   it('lists agents of an institution', async () => {
-    const calls = stubFetch({ data: [], meta: { limit: 25, offset: 0, has_more: false, parent: { ico: '35820713' } } });
+    const calls = stubFetch({ data: [], meta: { limit: 25, offset: 0, has_more: false, parent: { ico: '31361358' } } });
     const client = new FirmApi({ apiKey: 'test' });
 
-    await client.nbs.agents('35820713', { status: 'ended' });
+    await client.nbs.agents('31361358', { status: 'ended' });
 
     const url = new URL(calls[0]);
-    expect(url.pathname.endsWith('/company/ico/35820713/nbs-agents')).toBe(true);
+    expect(url.pathname.endsWith('/company/ico/31361358/nbs-agents')).toBe(true);
     expect(url.searchParams.get('status')).toBe('ended');
     expect(url.searchParams.get('offset')).toBe('0');
   });

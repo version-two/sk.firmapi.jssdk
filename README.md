@@ -160,7 +160,7 @@ const page = await client.nbs.entities({
 });
 
 // Agents that used to work for an institution
-const former = await client.nbs.agents('35820713', { status: 'ended' });
+const former = await client.nbs.agents('31361358', { status: 'ended' });
 
 // One entity (also foreign ones without an IČO) with full licence history
 const entity = await client.nbs.entity(page.data[0].entity_id);

@@ -2,6 +2,12 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.6.0
+
+### Added
+- `NbsEntitySummary.person_match` (API v1.23.0): how a sole-trader agent was linked to a person –
+  `address` (same name and address) or `name_postcode` (same name and postcode, a probable match).
+
 ## v2.5.0
 
 ### Added

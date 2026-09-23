@@ -70,6 +70,8 @@ export interface NbsEntitySummary {
   is_current: boolean;
   categories: string[];
   person_id: string | null;
+  /** `name_postcode` is a probable match (same name and postcode, no verbatim address match). */
+  person_match: 'address' | 'name_postcode' | null;
 }
 
 export interface NbsEntityDetail extends NbsEntitySummary {

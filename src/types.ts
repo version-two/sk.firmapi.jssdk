@@ -35,6 +35,72 @@ export interface ApiResponse<T = unknown> {
   };
 }
 
+export type NbsLicenceStatus = 'current' | 'ended';
+
+/** One NBS authorisation: a category, or a sector inside it, optionally tied to a parent institution. */
+export interface NbsLicence {
+  category: string;
+  sector: string | null;
+  country: string | null;
+  regfap_number: string | null;
+  valid_from: string | null;
+  parent: { entity_id: string | null; ico: string | null; name: string } | null;
+  status: NbsLicenceStatus;
+  first_seen_on: string;
+  ended_on: string | null;
+}
+
+export interface NbsInfo {
+  is_regulated: boolean;
+  license_types: string[];
+  categories: string[];
+  entity_id: string | null;
+  is_natural_person: boolean;
+  licences: NbsLicence[];
+  agents_count: number;
+}
+
+export interface NbsEntitySummary {
+  entity_id: string;
+  ico: string | null;
+  name: string;
+  address: string | null;
+  country: string | null;
+  is_natural_person: boolean;
+  is_current: boolean;
+  categories: string[];
+  person_id: string | null;
+}
+
+export interface NbsEntityDetail extends NbsEntitySummary {
+  first_seen_on: string | null;
+  delisted_on: string | null;
+  nbs_updated_at: string | null;
+  licences: NbsLicence[];
+  agents_count: number;
+}
+
+export interface NbsAgent extends NbsEntitySummary {
+  /** Only the licences tying this agent to the institution. */
+  licences: NbsLicence[];
+}
+
+export interface NbsPageMeta {
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export interface NbsEntityListResponse {
+  data: NbsEntitySummary[];
+  meta: NbsPageMeta;
+}
+
+export interface NbsAgentListResponse {
+  data: NbsAgent[];
+  meta: NbsPageMeta & { parent: NbsEntitySummary };
+}
+
 /** Function inside a collective body. */
 export type PersonFunction = 'chairman' | 'vice_chairman' | 'member';
 
@@ -651,11 +717,7 @@ export interface CompanyData {
     is_public_sector_partner: boolean;
     registrations: RpvsRegistration[];
   };
-  nbs?: {
-    is_regulated: boolean;
-    license_types: string[];
-    categories: string[];
-  };
+  nbs?: NbsInfo;
   soi_travel_agency?: {
     is_registered: boolean;
     name?: string;

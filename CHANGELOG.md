@@ -2,6 +2,17 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v2.5.0
+
+### Added
+- `client.nbs` resource (API v1.22.0) for the NBS register of financial market entities:
+  `entities()` (filter by category, sector, parent institution, country, natural person, status),
+  `entity()` (full licence history, including foreign entities without an IČO) and `agents()`
+  (financial agents working for an institution).
+- `NbsInfo` now types the extended `nbs` scope: `licences` (with parent institution and
+  current/ended status), `agents_count`, `is_natural_person` and `entity_id`. New types
+  `NbsLicence`, `NbsEntitySummary`, `NbsEntityDetail`, `NbsAgent` and the list responses.
+
 ## v2.4.0
 
 ### Added

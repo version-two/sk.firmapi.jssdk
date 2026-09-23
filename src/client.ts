@@ -2,6 +2,7 @@ import { Companies } from './resources/companies';
 import { Search } from './resources/search';
 import { Batch } from './resources/batch';
 import { Account } from './resources/account';
+import { Nbs } from './resources/nbs';
 import {
   ApiException,
   AuthenticationException,
@@ -38,6 +39,7 @@ export class FirmApi {
   public readonly search: Search;
   public readonly batch: Batch;
   public readonly account: Account;
+  public readonly nbs: Nbs;
 
   constructor(apiKeyOrConfig: string | FirmApiConfig) {
     const config: FirmApiConfig =
@@ -63,6 +65,7 @@ export class FirmApi {
     this.search = new Search(this);
     this.batch = new Batch(this);
     this.account = new Account(this);
+    this.nbs = new Nbs(this);
   }
 
   /**

@@ -146,6 +146,26 @@ Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
 `with(...scopes: string[])` is an escape hatch for raw scope tokens, e.g.
 `.with('tax', 'sanctions')`.
 
+### NBS register
+
+Financial market entities supervised by Národná banka Slovenska, their licences and
+agent → institution relations with history (requires the `nbs` feature):
+
+```typescript
+// Every independent financial agent in the insurance sector
+const page = await client.nbs.entities({
+  category: 'samostatný finančný agent',
+  sector: 'sektor poistenia alebo zaistenia',
+  limit: 50,
+});
+
+// Agents that used to work for an institution
+const former = await client.nbs.agents('35820713', { status: 'ended' });
+
+// One entity (also foreign ones without an IČO) with full licence history
+const entity = await client.nbs.entity(page.data[0].entity_id);
+```
+
 ### Search
 
 ```typescript

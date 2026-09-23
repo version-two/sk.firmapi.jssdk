@@ -3,6 +3,8 @@ export { Companies } from './resources/companies';
 export { Search } from './resources/search';
 export { Batch } from './resources/batch';
 export { Account } from './resources/account';
+export { Nbs } from './resources/nbs';
+export type { NbsEntityFilters, NbsAgentFilters, NbsPageOptions } from './resources/nbs';
 export {
   ApiException,
   AuthenticationException,
@@ -29,4 +31,13 @@ export type {
   FsInvestmentDeductionEntry,
   FsPatentBoxEntry,
   FsRegulatedEntry,
+  NbsInfo,
+  NbsLicence,
+  NbsLicenceStatus,
+  NbsEntitySummary,
+  NbsEntityDetail,
+  NbsAgent,
+  NbsPageMeta,
+  NbsEntityListResponse,
+  NbsAgentListResponse,
 } from './types';

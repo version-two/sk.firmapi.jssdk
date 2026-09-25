@@ -209,25 +209,93 @@ export interface Contacts {
   website?: string;
 }
 
+/**
+ * "double_entry" statements (podvojné účtovníctvo) report income, expenses and
+ * profit; "single_entry" ones (jednoduché účtovníctvo: non-profits, sole
+ * traders) report cash receipts and expenditures instead, in separate fields.
+ */
+export type AccountingBasis = 'double_entry' | 'single_entry';
+
+/** Headline figures of the latest regular statement. Whole euros; null = not published. */
 export interface Financials {
-  latest_year?: number;
-  revenue?: number;
-  profit?: number;
-  employees?: number;
+  year: number;
+  accounting_basis: AccountingBasis | null;
+  net_turnover: number | null;
+  sales_revenue: number | null;
+  total_income: number | null;
+  net_profit: number | null;
+  total_assets: number | null;
+  total_equity: number | null;
+  total_liabilities: number | null;
+  total_receipts: number | null;
+  total_expenditures: number | null;
+  receipts_minus_expenditures: number | null;
 }
 
+/**
+ * One RÚZ statement. Every figure has one fixed meaning across all statement
+ * templates, in whole euros for the statement's own period; null means the
+ * template does not publish it (never zero).
+ */
 export interface FinancialStatement {
   year: number;
   /** e.g. "riadna" (regular) | "mimoriadna" (extraordinary). */
-  statement_type?: string | null;
-  total_assets?: number | null;
-  total_equity?: number | null;
-  total_liabilities?: number | null;
-  total_revenue?: number | null;
-  net_profit?: number | null;
-  template_type?: string | null;
-  size_category?: string | null;
+  statement_type: string;
+  period_from: string | null;
+  period_to: string | null;
+  accounting_basis: AccountingBasis | null;
+  /** Statement template family, e.g. "POD", "MUJ", "NUJ", "ROPO", "NO", "FO". */
+  template_family: string | null;
+  /** Čistý obrat as printed by the statement. */
+  net_turnover: number | null;
+  /** Tržby: sales of goods, own products and services. */
+  sales_revenue: number | null;
+  /** Výnosy z hospodárskej činnosti spolu. */
+  operating_income: number | null;
+  /** Výnosy z finančnej činnosti spolu. */
+  financial_income: number | null;
+  /** Výnosy celkom (all of account class 6). */
+  total_income: number | null;
+  /** Náklady celkom, excluding income tax. */
+  total_expenses: number | null;
+  operating_result: number | null;
+  financial_result: number | null;
+  profit_before_tax: number | null;
+  income_tax: number | null;
+  /** Výsledok hospodárenia po zdanení. */
+  net_profit: number | null;
+  total_assets: number | null;
+  non_current_assets: number | null;
+  current_assets: number | null;
+  /** Cash in hand and bank accounts. */
+  cash: number | null;
+  total_equity: number | null;
+  total_liabilities: number | null;
+  /** Časové rozlíšenie on the liabilities side. */
+  accruals: number | null;
+  /** Single-entry only: Príjmy celkom. */
+  total_receipts: number | null;
+  /** Single-entry only: Výdavky celkom. */
+  total_expenditures: number | null;
+  /** Single-entry only: Rozdiel príjmov a výdavkov. */
+  receipts_minus_expenditures: number | null;
+  /** Single-entry only: Majetok celkom. */
+  property_total: number | null;
+  /** Single-entry only: Záväzky celkom. */
+  debts_total: number | null;
+  /** Single-entry only: Rozdiel majetku a záväzkov. */
+  property_minus_debts: number | null;
+  /** Statement lines each published figure was read from, e.g. "Úč POD (699): Výkaz ziskov a strát r. 02 + r. 29". */
+  figure_sources: Partial<Record<FinancialFigure, string>>;
 }
+
+export type FinancialFigure =
+  | 'net_turnover' | 'sales_revenue' | 'operating_income' | 'financial_income' | 'total_income'
+  | 'total_expenses' | 'operating_result' | 'financial_result' | 'profit_before_tax' | 'income_tax'
+  | 'net_profit' | 'total_assets' | 'non_current_assets' | 'current_assets' | 'cash'
+  | 'total_equity' | 'total_liabilities' | 'accruals'
+  | 'total_receipts' | 'total_expenditures' | 'receipts_minus_expenditures'
+  | 'property_total' | 'debts_total' | 'property_minus_debts';
 
 export interface FinancialStatementsInfo {
   /** Most recent regular ("riadna") statement, or null when none exist. */

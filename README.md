@@ -86,7 +86,7 @@ sandbox endpoint automatically, so any key you pass is ignored. An explicit
 ### Fresh vs. cached data (important)
 
 FirmAPI serves precomputed company data immediately. When a background refresh
-is queued, the response carries `meta.stale = true` — the data you received is
+is queued, the response carries `meta.stale = true` – the data you received is
 still valid; the flag only tells you a newer version is being prepared.
 
 By default (since v2.0) the SDK returns that immediately-available data without
@@ -112,7 +112,7 @@ const company = await client.companies.byIco('51636549');
 const company = await client.companies.byOrsrId('427482');
 ```
 
-Companies are always identified by IČO or ORSR ID — the SDK does not expose
+Companies are always identified by IČO or ORSR ID – the SDK does not expose
 internal numeric database identifiers.
 
 #### Enrichment scopes
@@ -286,7 +286,7 @@ interface CompanyData {
   tax?: TaxInfo;           // Starter+
   bank_accounts?: BankAccount[]; // Professional+
   contacts?: Contacts;     // Professional+
-  financials?: Financials; // Enterprise
+  financials?: Financials; // Professional+
 }
 ```
 

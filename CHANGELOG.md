@@ -2,6 +2,25 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.0.0
+
+### Breaking
+- Financial figures now have one fixed meaning each. `total_revenue` is removed: it held net
+  turnover, total income or cash receipts depending on the statement template.
+- `Financials` and `FinancialStatement` carry `net_turnover`, `sales_revenue`, `operating_income`,
+  `financial_income`, `total_income`, `total_expenses`, `operating_result`, `financial_result`,
+  `profit_before_tax`, `income_tax`, `net_profit`, balance sheet totals and `accruals`.
+  Single-entry statements (non-profits, sole traders) fill only `total_receipts`,
+  `total_expenditures`, `receipts_minus_expenditures`, `property_total`, `debts_total` and
+  `property_minus_debts`.
+- `template_type` and `size_category` are removed; statements carry `accounting_basis`,
+  `template_family` and `figure_sources` (the statement lines each figure was read from).
+  `null` means the statement does not publish the figure, never zero.
+
+### Added
+- Exported types `AccountingBasis`, `FinancialFigure`, `Financials`, `FinancialStatement`,
+  `FinancialStatementsInfo`.
+
 ## v2.6.0
 
 ### Added
@@ -76,10 +95,10 @@ PHP SDK v2.0.0.
   Use `byIco()` or `byOrsrId()`.
 
 ### Added
-- `CompanyQuery.fresh(maxRetries?)` — opt a single query into the bounded
+- `CompanyQuery.fresh(maxRetries?)` – opt a single query into the bounded
   fresh-data wait.
-- `CompanyQuery.with(...scopes)` — raw-scope escape hatch.
-- `CompanyQuery.withTradeLicenseActivities()` — ZRSR trade-licence activities.
+- `CompanyQuery.with(...scopes)` – raw-scope escape hatch.
+- `CompanyQuery.withTradeLicenseActivities()` – ZRSR trade-licence activities.
 - Automatic retry of transient failures (HTTP 5xx and network errors) with
   exponential backoff, controlled by the new `maxRetries` config option
   (default 2). HTTP 429 is never silently retried; it raises `RateLimitException`.

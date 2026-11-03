@@ -1,5 +1,13 @@
 import type { FirmApi } from '../client';
-import type { Company } from '../types';
+import type { Company, VatGroupMembersResponse } from '../types';
+
+export interface VatGroupMembersOptions {
+  /** Member name fragment, or IČO prefix when numeric. */
+  q?: string;
+  /** 1 to 100, default 25. */
+  limit?: number;
+  offset?: number;
+}
 
 export class CompanyQuery implements PromiseLike<Company> {
   private scopes: string[] = [];
@@ -182,5 +190,21 @@ export class Companies {
       this.client.waitForFreshData,
       this.client.maxStaleRetries,
     );
+  }
+
+  /**
+   * Members of a VAT group (§ 4b / § 4c), paged. Take the IČ DPH from
+   * `vat_registration.ic_dph` of any member (`withTax()`). Members the register
+   * lists without an IČO are counted in `meta.members_without_ico`, never named.
+   * Requires a plan with tax data (Starter+).
+   */
+  async groupMembers(icDph: string, options: VatGroupMembersOptions = {}): Promise<VatGroupMembersResponse> {
+    const { q, limit = 25, offset = 0 } = options;
+    const query: Record<string, string | number> = { limit: Math.min(limit, 100), offset };
+    if (q) {
+      query.q = q;
+    }
+
+    return this.client.get<VatGroupMembersResponse>(`/vat-groups/${encodeURIComponent(icDph)}/members`, query);
   }
 }

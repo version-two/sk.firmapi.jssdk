@@ -150,6 +150,27 @@ Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
 `data.e_box` (NASES electronic mailbox activated for delivery, with the month of
 the published list) is returned on every request and needs no scope.
 
+#### VAT groups
+
+`withTax()` returns `vat_registration` (`is_group_member`, `group_member_count`, `ic_dph`).
+The other members of the group are one call away, keyed by that IČ DPH (requires a plan
+with tax data):
+
+```typescript
+const { data } = await client.companies.byIco('34109340').withTax().get();
+const icDph = data.vat_registration?.ic_dph;
+
+if (data.vat_registration?.is_group_member && icDph) {
+  const page = await client.companies.groupMembers(icDph, { limit: 50 });
+  page.data.forEach((m) => console.log(m.ico, m.name, m.type));
+
+  // page.meta.total_members counts every member; members_without_ico are
+  // listed by the register without an IČO and are never named.
+  // Search by name, or by IČO prefix when numeric:
+  await client.companies.groupMembers(icDph, { q: 'holding' });
+}
+```
+
 ### NBS register
 
 Financial market entities supervised by Národná banka Slovenska, their licences and

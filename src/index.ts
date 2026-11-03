@@ -1,5 +1,6 @@
 export { FirmApi, FirmApi as default } from './client';
 export { Companies } from './resources/companies';
+export type { VatGroupMembersOptions } from './resources/companies';
 export { Search } from './resources/search';
 export { Batch } from './resources/batch';
 export { Account } from './resources/account';
@@ -52,6 +53,9 @@ export type {
   GrantStatus,
   ElectronicMailbox,
   VatRegistration,
+  VatGroupMember,
+  VatGroupMembersMeta,
+  VatGroupMembersResponse,
   NbsInfo,
   NbsLicence,
   NbsLicenceStatus,

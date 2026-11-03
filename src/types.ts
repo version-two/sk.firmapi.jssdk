@@ -217,6 +217,34 @@ export interface VatRegistration {
   vat_payer_since: string | null;
 }
 
+/** Member of a VAT group, as published by Finančná správa SR. */
+export interface VatGroupMember {
+  /** Usable with `client.companies.byIco()`. */
+  ico: string;
+  name: string | null;
+  /** Registration type, "§4b" or "§4c". */
+  type: string;
+  registered_at: string | null;
+  type_changed_at: string | null;
+  vat_payer_since: string | null;
+}
+
+export interface VatGroupMembersMeta {
+  limit: number;
+  offset: number;
+  has_more: boolean;
+  ic_dph: string;
+  /** Every member of the group, including those listed without an IČO (equals `vat_registration.group_member_count`). */
+  total_members: number;
+  /** Members the register lists without an IČO; never part of `data`. */
+  members_without_ico: number;
+}
+
+export interface VatGroupMembersResponse {
+  data: VatGroupMember[];
+  meta: VatGroupMembersMeta;
+}
+
 export interface BankAccount {
   iban: string;
   bank?: string;

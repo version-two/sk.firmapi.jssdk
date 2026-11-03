@@ -2,6 +2,16 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.3.0
+
+### Added
+- `client.companies.groupMembers(icDph, { q, limit, offset })` (API v1.26.0): the members of a
+  VAT group, paged, keyed by the group IČ DPH from `vat_registration.ic_dph`. Each member has
+  `ico`, `name`, `type` and the registration dates. `meta.total_members` counts every member;
+  `meta.members_without_ico` are those the register lists without an IČO, which are never named.
+- Types `VatGroupMember`, `VatGroupMembersMeta`, `VatGroupMembersResponse` and
+  `VatGroupMembersOptions`.
+
 ## v3.2.0
 
 ### Added

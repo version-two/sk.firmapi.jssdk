@@ -51,6 +51,7 @@ export type {
   GrantProvider,
   GrantStatus,
   ElectronicMailbox,
+  VatRegistration,
   NbsInfo,
   NbsLicence,
   NbsLicenceStatus,

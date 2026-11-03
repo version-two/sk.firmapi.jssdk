@@ -288,6 +288,7 @@ interface CompanyData {
   statutory_body?: StatutoryBody[];
   // Additional fields based on plan:
   tax?: TaxInfo;           // Starter+
+  vat_registration?: VatRegistration; // Starter+, with the tax scope (type, VAT group membership)
   bank_accounts?: BankAccount[]; // Professional+
   contacts?: Contacts;     // Professional+
   financials?: Financials; // Professional+

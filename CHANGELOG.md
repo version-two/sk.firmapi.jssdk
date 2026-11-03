@@ -2,6 +2,15 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.2.0
+
+### Added
+- Type `VatRegistration` and `CompanyData.vat_registration`: the registration type from the
+  VAT payers list of Finančná správa (`type`, e.g. `§4b`), `is_group_member` (VAT group, `§4b`
+  or `§4c`), `group_member_count`, `ic_dph` and the registration dates. Returned with the
+  existing `tax` scope (`withTax()`), so there is no new helper. The key is absent when the
+  company is not listed or the registration type has not been loaded yet.
+
 ## v3.1.0
 
 ### Added

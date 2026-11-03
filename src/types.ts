@@ -197,6 +197,26 @@ export interface TaxInfo {
   vies_verified_at?: string;
 }
 
+/**
+ * Registration in the VAT payers list of Finančná správa SR. Returned with the `tax` scope (Starter+).
+ * The key is absent when the company is not listed or the registration type has not been loaded yet,
+ * so a missing `vat_registration` never means "not a VAT group member".
+ */
+export interface VatRegistration {
+  /** Registration type as published (DRUH_REG_DPH), e.g. "§4", "§4b", "§5", "§7", "§7a". */
+  type: string;
+  /** IČ DPH of the registration; every member of a VAT group shares the group's IČ DPH. */
+  ic_dph: string | null;
+  /** True for the group registration types "§4b" and "§4c". */
+  is_group_member: boolean;
+  /** Subjects registered under the same group IČ DPH, including members without an IČO; null for non-members. */
+  group_member_count: number | null;
+  registered_at: string | null;
+  /** Date the registration type last changed. */
+  type_changed_at: string | null;
+  vat_payer_since: string | null;
+}
+
 export interface BankAccount {
   iban: string;
   bank?: string;
@@ -891,6 +911,8 @@ export interface CompanyData {
   /** Present only with the `orsr` (or `all`) scope. Share issues of joint-stock companies. */
   shares?: ShareIssue[];
   tax?: TaxInfo;
+  /** Returned together with `tax`; absent when the company is not in the VAT payers list or its type is not loaded. */
+  vat_registration?: VatRegistration;
   bank_accounts?: BankAccount[];
   contacts?: Contacts;
   financials?: Financials;

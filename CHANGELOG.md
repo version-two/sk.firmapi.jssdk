@@ -2,6 +2,20 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.1.0
+
+### Added
+- Scope helpers `withConvictedEntities()` (register of convicted legal entities, General
+  Prosecutor's Office), `withStateAid()` (PPA state aid and de minimis aid, from 2023) and
+  `withGrants()` (grant applications and approved amounts from the Ministry of Economy, the
+  Ministry of Environment and the Government Office, from 2023).
+- Types `ConvictedEntitiesInfo`, `ConvictedEntity`, `Conviction`, `ConvictionAppeal`,
+  `ConvictionOffence`, `ConvictionMeasure`, `StateAidInfo`, `StateAidEntry`, `StateAidKind`,
+  `StateAidOutcome`, `GrantsInfo`, `GrantEntry`, `GrantProvider`, `GrantStatus` and
+  `ElectronicMailbox`, plus `CompanyData.convicted_entities`, `state_aid`, `grants` and `e_box`.
+  `e_box` (NASES mailbox activated for delivery, with the month of the list) comes with every
+  response and needs no scope.
+
 ## v3.0.0
 
 ### Breaking

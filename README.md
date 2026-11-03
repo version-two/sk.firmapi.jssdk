@@ -141,10 +141,14 @@ Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
 `withContractingAuthority`, `withDebarred`, `withUvoReferences`,
 `withFsImports`, `withIllegalEmployment`, `withCourtDecisions`,
 `withEmployerHeadcount`, `withSoiTravelAgency`, `withSvpsEstablishments`,
-`withCrpProjects`, `withItms21`, `withTradeLicenseActivities`, `withAll`.
+`withCrpProjects`, `withItms21`, `withConvictedEntities`, `withStateAid`,
+`withGrants`, `withTradeLicenseActivities`, `withAll`.
 
 `with(...scopes: string[])` is an escape hatch for raw scope tokens, e.g.
 `.with('tax', 'sanctions')`.
+
+`data.e_box` (NASES electronic mailbox activated for delivery, with the month of
+the published list) is returned on every request and needs no scope.
 
 ### NBS register
 

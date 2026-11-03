@@ -733,6 +733,131 @@ export interface FsData {
   regulated?: FsRegulatedEntry[] | null;
 }
 
+export type ConvictionMeasure =
+  | 'fine'
+  | 'dissolution'
+  | 'forfeiture'
+  | 'activity_ban'
+  | 'subsidy_ban'
+  | 'procurement_ban'
+  | 'publication'
+  | 'damages';
+
+export interface ConvictionAppeal {
+  court: string;
+  ruling: string;
+  ruling_date: string;
+  case_number: string;
+}
+
+export interface ConvictionOffence {
+  provision: string;
+  committed?: string | null;
+  place?: string | null;
+}
+
+/** `parsed` is false when the register wording did not follow the known grammar; no other field is then present. */
+export interface Conviction {
+  parsed: boolean;
+  court?: string;
+  ruling?: string;
+  ruling_date?: string;
+  case_number?: string;
+  final_date?: string | null;
+  appeals?: ConvictionAppeal[];
+  offences?: ConvictionOffence[];
+  fine_eur?: number | null;
+  measures?: ConvictionMeasure[];
+}
+
+export interface ConvictedEntity {
+  name: string;
+  seat?: string | null;
+  /** Official record at the Prosecutor General. */
+  detail_url?: string | null;
+  convictions: Conviction[];
+}
+
+/** Register of convicted legal entities (Generálna prokuratúra SR). Always present when the scope is requested. */
+export interface ConvictedEntitiesInfo {
+  listed: boolean;
+  count: number;
+  since?: string | null;
+  entries: ConvictedEntity[];
+}
+
+export type StateAidKind = 'state_aid' | 'de_minimis' | 'other';
+
+export type StateAidOutcome =
+  | 'rejected'
+  | 'withdrawn'
+  | 'terminated_by_ppa'
+  | 'terminated_by_applicant'
+  | 'contract_not_signed_ppa'
+  | 'contract_not_signed_applicant'
+  | 'contract_not_signed_both'
+  | 'other'
+  | 'not_provided';
+
+export interface StateAidEntry {
+  year: number | null;
+  scheme: string;
+  /** Aid scheme number, for example SA.12345 or DM-1/2024. */
+  scheme_code?: string | null;
+  kind: StateAidKind;
+  provided: boolean;
+  amount_eur?: number | null;
+  returned_eur?: number | null;
+  /** Why the aid was not provided; null when it was provided. */
+  outcome?: StateAidOutcome | null;
+}
+
+/** State aid and de minimis aid from the Agricultural Paying Agency, from 2023. Always present when the scope is requested. */
+export interface StateAidInfo {
+  listed: boolean;
+  count: number;
+  provided_count: number;
+  provided_total_eur: number;
+  since_year: number | null;
+  entries: StateAidEntry[];
+}
+
+export type GrantProvider = 'mh' | 'mds' | 'mzp' | 'rrpv' | 'usvrk';
+
+export type GrantStatus = 'paid' | 'approved' | 'rejected' | 'in_progress' | 'other';
+
+export interface GrantEntry {
+  year: number;
+  provider: GrantProvider;
+  call_id?: string | null;
+  project?: string | null;
+  status: GrantStatus;
+  submitted_at?: string | null;
+  decided_at?: string | null;
+  requested_eur?: number | null;
+  approved_eur?: number | null;
+  co_financing_eur?: number | null;
+  unspent_eur?: number | null;
+  contract_no?: string | null;
+}
+
+/** Grant applications to ministries and the Government Office, from 2023. Always present when the scope is requested. */
+export interface GrantsInfo {
+  listed: boolean;
+  count: number;
+  approved_count: number;
+  approved_total_eur: number;
+  since_year: number | null;
+  entries: GrantEntry[];
+}
+
+/** NASES list of electronic mailboxes activated for delivery. */
+export interface ElectronicMailbox {
+  activated_for_delivery: boolean;
+  /** Month (YYYY-MM) of the published list the answer is based on. */
+  as_of: string;
+}
+
 export interface CompanyData {
   id: number;
   orsr_id: string;
@@ -818,6 +943,11 @@ export interface CompanyData {
   uvo_references?: UvoReferencesInfo;
   crp_projects?: CrpProjectsInfo;
   itms21?: Itms21Info;
+  convicted_entities?: ConvictedEntitiesInfo;
+  state_aid?: StateAidInfo;
+  grants?: GrantsInfo;
+  /** Returned on every request; null until the NASES list has been imported. */
+  e_box?: ElectronicMailbox | null;
   fs?: FsData;
 }
 

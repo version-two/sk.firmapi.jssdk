@@ -65,4 +65,6 @@ export type {
   NbsPageMeta,
   NbsEntityListResponse,
   NbsAgentListResponse,
+  TransportLicenceInfo,
+  TransportLicenceEntry,
 } from './types';

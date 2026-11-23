@@ -2,6 +2,18 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.4.0
+
+### Added
+- `TransportLicenceInfo.licences` (API v1.32.0): every licence and permit of the carrier as
+  `TransportLicenceEntry` (`kind` `licence` or `permit`, `number`, `transport_type`,
+  `vehicles_count`, `valid_from`, `valid_to`, `is_valid`), valid ones first.
+- `TransportLicenceInfo` and `TransportLicenceEntry` are exported from the package root.
+
+### Changed
+- `has_licence` is true only when a licence or permit is valid today; the summary fields come
+  from the best record (a valid EU licence first).
+
 ## v3.3.0
 
 ### Added

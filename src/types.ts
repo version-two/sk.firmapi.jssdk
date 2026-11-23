@@ -530,12 +530,26 @@ export interface SbsInfo {
   valid_to?: string | null;
 }
 
+export interface TransportLicenceEntry {
+  kind: 'licence' | 'permit';
+  number: string;
+  transport_type: string | null;
+  vehicles_count: number | null;
+  valid_from: string | null;
+  valid_to: string | null;
+  /** Valid today, computed from the dates on every response. */
+  is_valid: boolean;
+}
+
 export interface TransportLicenceInfo {
+  /** At least one licence or permit is valid today. */
   has_licence: boolean;
   eurolicence_number?: string | null;
   vehicles_count?: number | null;
   valid_from?: string | null;
   valid_to?: string | null;
+  /** Every licence and permit, valid ones first. */
+  licences?: TransportLicenceEntry[];
 }
 
 export interface UtilitySegment {

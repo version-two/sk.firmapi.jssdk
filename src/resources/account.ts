@@ -5,25 +5,23 @@ export class Account {
   constructor(private readonly client: FirmApi) {}
 
   /**
-   * Get current period usage statistics.
+   * Get current period usage. Narrow on `data.billing_mode` (`credits` or `legacy`).
    */
   async usage(): Promise<UsageResponse> {
     return this.client.get<UsageResponse>('/account/usage');
   }
 
   /**
-   * Get remaining quota for current period.
+   * Get the remaining quota. Narrow on `data.billing_mode` (`credits` or `legacy`).
    */
   async quota(): Promise<QuotaResponse> {
     return this.client.get<QuotaResponse>('/account/quota');
   }
 
   /**
-   * Get usage history.
-   *
-   * @param days - Number of days to retrieve (default: 30)
+   * Get daily usage history. The range is set by your plan (`meta.history_months`).
    */
-  async history(days: number = 30): Promise<HistoryResponse> {
-    return this.client.get<HistoryResponse>('/account/history', { days });
+  async history(): Promise<HistoryResponse> {
+    return this.client.get<HistoryResponse>('/account/history');
   }
 }

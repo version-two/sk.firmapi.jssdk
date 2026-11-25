@@ -920,16 +920,36 @@ export interface ElectronicMailbox {
   as_of: string;
 }
 
+export interface CompanyAddress {
+  street: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string | null;
+}
+
+export interface CompanyBusinessActivity {
+  activity: string;
+  since?: string;
+}
+
 export interface CompanyData {
-  id: number;
-  orsr_id: string;
   ico: string;
   name: string;
-  address: string;
-  registration_date?: string;
-  legal_form?: string;
-  business_activities?: string;
-  registered_capital?: string;
+  legal_form: string | null;
+  legal_form_code: string | null;
+  address: CompanyAddress;
+  established_date: string | null;
+  terminated_date: string | null;
+  source_register: string | null;
+  status: string | null;
+  nace_code?: string;
+  nace_description?: string;
+  /** Present for companies in the commercial register (ORSR). */
+  orsr_id?: string;
+  /** Present for companies in the commercial register (ORSR). */
+  business_activities?: CompanyBusinessActivity[];
+  /** Present for companies in the commercial register (ORSR), e.g. `6 640 EUR`. */
+  registered_capital?: string | null;
   /** Present only with the `orsr` (or `all`) scope. Equity holders only. */
   shareholders?: Shareholder[];
   /** Present only with the `orsr` (or `all`) scope. Ordered current first, chairman before members. */
@@ -1046,40 +1066,142 @@ export interface AutocompleteResponse {
   };
 }
 
+export type BatchType = 'ico' | 'names';
+
+export interface BatchStatus {
+  /** Batch ID (ULID). */
+  id: string;
+  type: BatchType;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total: number;
+  processed: number;
+  found: number;
+  not_found: number;
+  error: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  /** Status and results are available until this time (7 days after submission). */
+  expires_at: string;
+}
+
+export interface BatchStatusResponse {
+  data: BatchStatus;
+}
+
+export interface BatchAcceptedResponse {
+  data: BatchStatus;
+  meta: {
+    status_url: string;
+    results_url: string;
+  };
+}
+
+export interface BatchCompany {
+  id: string;
+  ico: string;
+  name: string | null;
+  address: string | null;
+  legal_form: string | null;
+  established_date: string | null;
+}
+
 export interface BatchResult {
   found: boolean;
-  data: CompanyData | null;
+  data: BatchCompany | null;
 }
 
 export interface BatchResponse extends ApiResponse<Record<string, BatchResult>> {
   meta: {
+    id: string;
+    type: 'ico';
     total: number;
     found: number;
     not_found: number;
   };
 }
 
-export interface UsageData {
-  requests_today: number;
-  requests_month: number;
-  limit_daily: number;
-  limit_monthly: number;
+export interface BatchNameMatch {
+  id: string;
+  ico: string;
+  name: string;
+  previous_names: string[];
 }
+
+export interface BatchNameResult {
+  count: number;
+  matches: BatchNameMatch[];
+}
+
+export interface BatchNamesResponse extends ApiResponse<Record<string, BatchNameResult>> {
+  meta: {
+    id: string;
+    type: 'names';
+    total_queries: number;
+    found: number;
+    not_found: number;
+  };
+}
+
+export interface AccountTier {
+  name: string;
+  slug: string | null;
+}
+
+export interface CreditsUsageData {
+  billing_mode: 'credits';
+  credits: {
+    balance: number;
+    monthly_grant: number;
+    rollover: number;
+    used_this_period: number;
+  };
+  period: { start: string; end: string };
+  tier: AccountTier;
+  overage: { enabled: boolean; rate: number };
+}
+
+export interface LegacyUsageData {
+  billing_mode: 'legacy';
+  period: { start: string; end: string };
+  usage: { this_month: number };
+  limits: { monthly: number };
+  remaining: { monthly: number };
+  tier: AccountTier;
+}
+
+export type UsageData = CreditsUsageData | LegacyUsageData;
 
 export interface UsageResponse extends ApiResponse<UsageData> {}
 
-export interface QuotaData {
-  remaining_daily: number;
-  remaining_monthly: number;
-  reset_daily: string;
-  reset_monthly: string;
+export interface CreditsQuotaData {
+  billing_mode: 'credits';
+  credits_remaining: number;
+  credits_limit: number;
+  overage_enabled: boolean;
+  alert_thresholds: number[];
+  next_grant: string | null;
 }
+
+export interface LegacyQuotaData {
+  billing_mode: 'legacy';
+  monthly: { remaining: number; limit: number; used: number };
+  resets: { monthly: string };
+}
+
+export type QuotaData = CreditsQuotaData | LegacyQuotaData;
 
 export interface QuotaResponse extends ApiResponse<QuotaData> {}
 
 export interface HistoryEntry {
   date: string;
   requests: number;
+  credits: number;
 }
 
-export interface HistoryResponse extends ApiResponse<HistoryEntry[]> {}
+export interface HistoryResponse extends ApiResponse<HistoryEntry[]> {
+  meta: {
+    start_date: string;
+    history_months: number;
+  };
+}

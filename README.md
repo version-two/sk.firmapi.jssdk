@@ -9,16 +9,19 @@ Official JavaScript/TypeScript SDK for [FirmAPI](https://firmapi.sk) - Slovak Co
 
 ## Installation
 
+The package is not published to the npm registry yet. Install it from GitHub,
+pinned to a release tag (the built package lives in `dist` in the repository):
+
 ```bash
-npm install firmapi@^2
+npm install github:version-two/sk.firmapi.jssdk#v3.4.1
 # or
-yarn add firmapi@^2
+yarn add github:version-two/sk.firmapi.jssdk#v3.4.1
 # or
-pnpm add firmapi@^2
+pnpm add github:version-two/sk.firmapi.jssdk#v3.4.1
 ```
 
-> These docs cover **v2.x**. Upgrading from v1? See [CHANGELOG.md](CHANGELOG.md)
-> for the breaking changes (fast-by-default, typed responses, `byId` removed).
+> These docs cover **v3.x**. Upgrading? See [Upgrading](#upgrading) and
+> [CHANGELOG.md](CHANGELOG.md) for the breaking changes.
 
 ## Quick Start
 
@@ -30,6 +33,7 @@ const client = new FirmApi('your-api-key');
 // Get company by IČO
 const company = await client.companies.byIco('51636549');
 console.log(company.data.name); // "Version Two s. r. o."
+console.log(company.data.address.city);
 
 // Search companies
 const results = await client.search.autocomplete('version');
@@ -67,7 +71,7 @@ raised as a `RateLimitException` so you control pacing.
 ### Sandbox mode
 
 The sandbox needs no API key, returns demo data, and has no rate limits. Enable
-it any of three ways:
+it either way:
 
 ```typescript
 // 1. Explicit factory (or config flag)
@@ -82,6 +86,10 @@ const client = new FirmApi('ignored'); // auto-detected -> sandbox
 When sandbox is active the base URL and key are overridden with the built-in
 sandbox endpoint automatically, so any key you pass is ignored. An explicit
 `sandbox: true | false` in the config always wins over the env var.
+
+The sandbox only knows ten demo companies, for example `36421928` (Websupport)
+or `31333532` (ESET). Any other IČO, including `51636549` used in the examples
+below, answers 404 there. The `GET /v1/sandbox/companies` endpoint lists them.
 
 ### Fresh vs. cached data (important)
 
@@ -131,7 +139,8 @@ const company = await client.companies.byIco('51636549')
 const all = await client.companies.byIco('51636549').withAll().get();
 ```
 
-Available scope helpers: `withTax`, `withBankAccounts`, `withContacts`,
+Available scope helpers: `withOrsr` (commercial register people and bodies:
+shareholders, statutory body, procurators and so on), `withTax`, `withBankAccounts`, `withContacts`,
 `withFinancials`, `withDebtorStatus`, `withFinancialStatements`,
 `withInsolvency`, `withCommercialBulletin`, `withPublicContracts`,
 `withProcurement`, `withExecutionAuthorizations`, `withRpvs`, `withNbs`,
@@ -217,42 +226,53 @@ const results = await client.search.advanced({
 
 ### Batch Operations
 
-Batch operations require Starter plan or higher.
+Batch operations require the Professional plan or higher. The maximum number of
+items per batch depends on your plan (Professional 100, Enterprise 1,000). A batch
+costs 1 credit per 2 items (rounded up) and is processed asynchronously within an
+hour, when the server is less busy. Status and results are free and kept for 7 days.
 
 ```typescript
-// Batch lookup by IČO
-const results = await client.batch.byIco([
+// Submit a batch by IČO (or client.batch.byNames([...]))
+const { data: batch } = await client.batch.byIco([
   '51636549',
   '12345678',
   '87654321',
 ]);
+// batch: { id, type, status: 'pending', total, processed, ... }
 
-// Batch lookup by names
-const results = await client.batch.byNames([
-  'Version Two s. r. o.',
-  'Example Company',
-]);
+// Poll the status (free)
+const { data: state } = await client.batch.status(batch.id);
+// state.status: 'pending' | 'processing' | 'completed' | 'failed'
 
-// Check batch job status
-const status = await client.batch.status('batch-id-123');
-
-// Get batch results
-const results = await client.batch.results('batch-id-123');
+// Once completed, download the results (free); 409 while not finished
+if (state.status === 'completed') {
+  const { data, meta } = await client.batch.results(batch.id);
+  // keyed by IČO for byIco(), by the name query for byNames()
+}
 ```
 
 ### Account
 
+Responses depend on how your account is billed. Narrow on `data.billing_mode`
+(`credits` or `legacy`):
+
 ```typescript
-// Get current usage
+// Current period usage
 const usage = await client.account.usage();
-console.log(`Requests this month: ${usage.data.requests_month}`);
+if (usage.data.billing_mode === 'credits') {
+  console.log(`Credits used: ${usage.data.credits.used_this_period}`);
+  console.log(`Balance: ${usage.data.credits.balance}`);
+}
 
-// Get remaining quota
+// Remaining quota
 const quota = await client.account.quota();
-console.log(`Remaining: ${quota.data.remaining_daily} requests today`);
+if (quota.data.billing_mode === 'credits') {
+  console.log(`Credits remaining: ${quota.data.credits_remaining}`);
+}
 
-// Get usage history
-const history = await client.account.history(30);
+// Daily usage history; the range is set by your plan (meta.history_months)
+const history = await client.account.history();
+history.data.forEach((day) => console.log(day.date, day.requests, day.credits));
 ```
 
 ## TypeScript Support
@@ -286,33 +306,32 @@ All API responses follow this structure:
 interface ApiResponse<T> {
   data: T;
   meta?: {
-    synced_at?: string;
+    stale?: boolean;
     source?: string;
   };
 }
 ```
 
-Company data includes:
+Company data (base fields; enrichment scopes add more, see `CompanyData` in the
+type definitions):
 
 ```typescript
 interface CompanyData {
-  id: number;
-  orsr_id: string;
   ico: string;
   name: string;
-  address: string;
-  registration_date?: string;
-  legal_form?: string;
-  business_activities?: string;
-  registered_capital?: string;
-  shareholders?: Shareholder[];
+  legal_form: string | null;
+  address: { street; city; postal_code; country };
+  established_date: string | null;
+  terminated_date: string | null;
+  status: string | null;
+  orsr_id?: string;                // commercial register companies
+  business_activities?: { activity: string; since?: string }[];
+  registered_capital?: string | null;
+  shareholders?: Shareholder[];    // with the orsr scope
   statutory_body?: StatutoryBody[];
-  // Additional fields based on plan:
-  tax?: TaxInfo;           // Starter+
-  vat_registration?: VatRegistration; // Starter+, with the tax scope (type, VAT group membership)
-  bank_accounts?: BankAccount[]; // Professional+
-  contacts?: Contacts;     // Professional+
-  financials?: Financials; // Professional+
+  tax?: TaxInfo;                   // with the tax scope
+  vat_registration?: VatRegistration;
+  financials?: Financials;         // with the financials scope
 }
 ```
 
@@ -350,32 +369,44 @@ try {
 
 ## Rate Limits
 
-Rate limits depend on your subscription tier:
-
-| Tier | Per Minute | Per Day | Per Month |
-|------|------------|---------|-----------|
-| Free | 5 | 10 | 100 |
-| Starter | 10 | 100 | 1,000 |
-| Professional | 30 | 500 | 10,000 |
-| Enterprise | 100 | 5,000 | 100,000 |
+Usage is metered in credits: one API call costs one credit, cached and error
+responses cost nothing. Each plan grants a monthly credit balance; see the
+[pricing page](https://firmapi.sk/en/pricing) for the current plans.
+Independently of the plan, one API key may send at most 120 requests per
+minute; beyond that the API answers 429 and the SDK throws `RateLimitException`
+(`retryAfter` is read from the `Retry-After` header, 60 seconds when absent).
 
 ## Browser Usage
 
-The SDK uses the standard `fetch` API and works in modern browsers:
+The SDK uses the standard `fetch` API and works in modern browsers when bundled
+with your application (`import FirmApi from 'firmapi'`). Do not ship a
+production API key to a browser; call the API from your own backend.
 
-```html
-<script type="module">
-  import FirmApi from 'https://cdn.jsdelivr.net/npm/firmapi/dist/index.mjs';
+## Upgrading
 
-  const client = new FirmApi('your-api-key');
-  const company = await client.companies.byIco('51636549');
-  console.log(company);
-</script>
-```
+### v3.4.1
 
-## Upgrading from v1.x
+v3.4.1 follows the API's asynchronous batch flow and corrects the types to
+what the API returns:
 
-v2.0 is a behavior/API change:
+- **Batches are asynchronous.** `byIco()` / `byNames()` return the batch ID;
+  `batch.status(id)` reports progress and `batch.results(id)` returns the
+  results once the status is `completed`.
+- **`account.usage()`, `account.quota()` and `account.history()` have real
+  types.** Responses are a union on `billing_mode` (`credits` | `legacy`);
+  `requests_month`, `remaining_daily` and the other old fields never existed.
+  `history()` takes no argument (the range is set by your plan) and entries
+  carry `credits`.
+- **`CompanyData` matches the API.** The `id` field was never returned and is
+  gone; `address` is an object, `registration_date` is `established_date`, and
+  `business_activities` is a list.
+
+### From v2.x to v3.0
+
+`total_revenue` was removed from `Financials` and `FinancialStatement`; each
+figure now has one fixed meaning. See [CHANGELOG.md](CHANGELOG.md).
+
+### From v1.x to v2.0
 
 - **Fast by default.** Lookups no longer block waiting for a background refresh.
   If you relied on the old auto-wait, call `.fresh()` per query, or set
@@ -392,5 +423,6 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-- Documentation: [https://firmapi.sk/docs](https://firmapi.sk/docs)
-- Email: support@firmapi.sk
+- Documentation: [https://firmapi.sk/en/docs](https://firmapi.sk/en/docs)
+- SDK overview: [https://firmapi.sk/en/docs/sdk](https://firmapi.sk/en/docs/sdk)
+- Contact form: [https://firmapi.sk/en/contact](https://firmapi.sk/en/contact)

@@ -2,6 +2,42 @@
 
 All notable changes to the FirmAPI JavaScript/TypeScript SDK are documented here.
 
+## v3.4.1
+
+Batch lookups are asynchronous, and the types match what the API returns.
+
+### Changed
+- Batch lookups are asynchronous. `batch.byIco()` and `batch.byNames()` return a
+  `BatchAcceptedResponse` with the batch ID (`data.id`, HTTP 202). Poll `batch.status(id)`
+  until `data.status` is `completed`, then call `batch.results(id)`. A batch is processed within
+  an hour, costs 1 credit per 2 items (rounded up), and its status and results are free and
+  kept for 7 days. Before this release both status endpoints answered 404.
+- `batch.results()` throws an `ApiException` with `statusCode` 409 while the batch is pending or
+  processing, or after it failed.
+- `account.usage()` and `account.quota()` are typed as a union on `billing_mode` (`credits` |
+  `legacy`) matching the API. The old `requests_today`, `requests_month`, `limit_daily`,
+  `remaining_daily` and related fields never existed.
+- `account.history()` takes no argument (the API ignored `days`; the range is set by the plan);
+  `HistoryEntry` gains `credits` and `HistoryResponse` carries `meta.history_months`.
+- `CompanyData` matches the API: `id` removed (never returned), `address` is a `CompanyAddress`
+  object, `registration_date` is `established_date`, `business_activities` is a list, and the
+  base fields `legal_form_code`, `terminated_date`, `source_register`, `status` are typed.
+  `orsr_id`, `business_activities` and `registered_capital` are optional.
+
+### Added
+- Types `BatchStatus`, `BatchStatusResponse`, `BatchAcceptedResponse`, `BatchCompany`,
+  `BatchResult`, `BatchNamesResponse`, `BatchNameResult`, `BatchNameMatch`, `BatchType`.
+- Types `CompanyAddress`, `CompanyBusinessActivity`, `CreditsUsageData`, `LegacyUsageData`,
+  `CreditsQuotaData`, `LegacyQuotaData`, `AccountTier` and the exports `UsageData`, `QuotaData`,
+  `HistoryResponse`, `HistoryEntry`.
+- `prepare` script: installing from GitHub (`npm install github:version-two/sk.firmapi.jssdk#v3.4.1`)
+  now builds `dist`; before, the repository carried no build output, so that install had nothing
+  to load.
+
+### Fixed
+- README: install command, version, links, sandbox demo IČO, rate limit section (credits and the
+  120 requests per minute per key limit), Professional plan requirement for batch.
+
 ## v3.4.0
 
 ### Added
